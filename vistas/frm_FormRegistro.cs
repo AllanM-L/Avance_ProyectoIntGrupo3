@@ -40,6 +40,8 @@ namespace Wfrm_RastreoVehiculos.vistas
                         txtNombre.Text = reader["nombre"].ToString();
                         txtMarca.Text = reader["marca"].ToString();
                         txtModelo.Text = reader["modelo"].ToString();
+                        txtTipoVehiculo.Text = reader["tipoVehiculo"]?.ToString() ?? "";
+                        txtPlaca.Text = reader["placa"].ToString();
                         txtMillasRecorridas.Text = reader["millasRecorridas"].ToString();
                         if (!Convert.IsDBNull(reader["ultimoMantenimiento"]))
                         {
@@ -65,21 +67,26 @@ namespace Wfrm_RastreoVehiculos.vistas
 
                     if (idVehiculo == null)
                     {
-                        query = @"INSERT INTO vehiculos (nombre, marca, modelo, millasRecorridas, ultimoMantenimiento)
-                              VALUES (@nombre, @marca, @modelo, @millas, @mantenimiento)";
+                        query = @"INSERT INTO vehiculos 
+                            (nombre, marca, modelo, tipoVehiculo, placa, millasRecorridas, ultimoMantenimiento)
+                            VALUES 
+                            (@nombre, @marca, @modelo, @tipoVehiculo, @placa, @millas, @mantenimiento)";
                     }
                     else
                     {
                         query = @"UPDATE vehiculos 
-                              SET nombre = @nombre, marca = @marca, modelo = @modelo, 
-                                  millasRecorridas = @millas, ultimoMantenimiento = @mantenimiento 
-                              WHERE id = @id";
+                             SET nombre = @nombre, marca = @marca, modelo = @modelo, tipoVehiculo = @tipoVehiculo,
+                             placa = @placa, millasRecorridas = @millas, ultimoMantenimiento = @mantenimiento 
+                             WHERE id = @id";
                     }
+
 
                     MySqlCommand command = new MySqlCommand(query, connection);
                     command.Parameters.AddWithValue("@nombre", txtNombre.Text);
                     command.Parameters.AddWithValue("@marca", txtMarca.Text);
                     command.Parameters.AddWithValue("@modelo", txtModelo.Text);
+                    command.Parameters.AddWithValue("@tipoVehiculo", txtTipoVehiculo.Text);
+                    command.Parameters.AddWithValue("@placa", txtPlaca.Text); 
                     command.Parameters.AddWithValue("@millas", int.Parse(txtMillasRecorridas.Text));
                     command.Parameters.AddWithValue("@mantenimiento", dtpUltimoMantenimiento.Value.Date);
 
@@ -99,6 +106,11 @@ namespace Wfrm_RastreoVehiculos.vistas
         }
 
         private void frm_FormRegistro_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtTipoVehiculo_TextChanged(object sender, EventArgs e)
         {
 
         }

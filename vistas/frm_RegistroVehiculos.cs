@@ -8,38 +8,43 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using MySql.Data.MySqlClient;
+using Wfrm_RastreoVehiculos.logica;
+
 
 namespace Wfrm_RastreoVehiculos.vistas
 {
     public partial class frm_RegistroVehiculos : Form
     {
-        private string connectionString = "Server=localhost;Database=vehiculos;Uid=root;Pwd=tu_contraseña;";
+        private cls_DBConnection dbConnection = new cls_DBConnection();
+        BindingSource bindingSource = new BindingSource();
 
         public frm_RegistroVehiculos()
         {
             InitializeComponent();
         }
+
+        private void frm_RegistroVehiculos_Load(object sender, EventArgs e)
+        {
+            CargarVehiculos();
+        }
+
         private void txtBuscar_TextChanged(object sender, EventArgs e)
         {
-            string filtro = txtBuscar.Text.Trim().ToLower();
-
-            foreach (DataGridViewRow fila in dgvVehiculos.Rows)
+            string filtro = txtBuscar.Text.Trim().Replace("'", "''");
+            if (bindingSource.DataSource is DataTable)
             {
-                if (fila.IsNewRow) continue;
-
-                bool visible = fila.Cells["nombre"].Value.ToString().ToLower().Contains(filtro) ||
-                               fila.Cells["placa"].Value.ToString().ToLower().Contains(filtro);
-
-                fila.Visible = visible;
+                (bindingSource.DataSource as DataTable).DefaultView.RowFilter =
+                    $"nombre LIKE '%{filtro}%' OR placa LIKE '%{filtro}%'";
             }
         }
 
         private void btnRegistrar_Click(object sender, EventArgs e)
         {
-            frm_FormRegistro frm = new frm_FormRegistro(); 
-            frm.FormClosed += (s, args) => CargarVehiculos(); 
+            frm_FormRegistro frm = new frm_FormRegistro();
+            frm.FormClosed += (s, args) => CargarVehiculos();
             frm.ShowDialog();
         }
+
         private void btnEditar_Click(object sender, EventArgs e)
         {
             if (dgvVehiculos.SelectedRows.Count > 0)
@@ -47,7 +52,7 @@ namespace Wfrm_RastreoVehiculos.vistas
                 DataGridViewRow fila = dgvVehiculos.SelectedRows[0];
                 int idVehiculo = Convert.ToInt32(fila.Cells["id"].Value);
 
-                frm_FormRegistro frm = new frm_FormRegistro(idVehiculo); 
+                frm_FormRegistro frm = new frm_FormRegistro(idVehiculo);
                 frm.FormClosed += (s, args) => CargarVehiculos();
                 frm.ShowDialog();
             }
@@ -57,23 +62,20 @@ namespace Wfrm_RastreoVehiculos.vistas
             }
         }
 
-
-        private void frm_RegistroVehiculos_Load(object sender, EventArgs e)
-        {
-            CargarVehiculos();
-        }
-
         private void CargarVehiculos()
         {
             try
             {
-                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                using (MySqlConnection connection = dbConnection.GetConnection())
                 {
-                    string query = "SELECT id, nombre, marca, modelo, millasRecorridas, ultimoMantenimiento FROM vehiculos";
+                    string query = "SELECT id, nombre, marca, modelo, tipoVehiculo, placa, millasRecorridas, ultimoMantenimiento FROM vehiculos";
+
                     MySqlDataAdapter adapter = new MySqlDataAdapter(query, connection);
                     DataTable table = new DataTable();
                     adapter.Fill(table);
-                    dgvVehiculos.DataSource = table;
+
+                    bindingSource.DataSource = table;
+                    dgvVehiculos.DataSource = bindingSource;
                 }
             }
             catch (Exception ex)
@@ -90,4 +92,5 @@ namespace Wfrm_RastreoVehiculos.vistas
         }
     }
 }
+
 

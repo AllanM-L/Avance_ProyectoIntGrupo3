@@ -1,4 +1,7 @@
-﻿namespace Wfrm_RastreoVehiculos.vistas
+﻿using System.Drawing;
+using System.Windows.Forms;
+
+namespace Wfrm_RastreoVehiculos.vistas
 {
     partial class frm_Principal
     {
@@ -11,6 +14,8 @@
         private System.Windows.Forms.Label lblVehiculo;
         private System.Windows.Forms.Button btnSalir;
         private System.Windows.Forms.Label lblRuta;
+        private System.Windows.Forms.PictureBox picAlerta;
+
 
 
         protected override void Dispose(bool disposing)
@@ -33,7 +38,9 @@
             this.btnSalir = new System.Windows.Forms.Button();
             this.lblRuta = new System.Windows.Forms.Label();
             this.pnl_GPS = new System.Windows.Forms.Panel();
+            this.picAlerta = new System.Windows.Forms.PictureBox();
             this.pnl_GPS.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picAlerta)).BeginInit();
             this.SuspendLayout();
             // 
             // gMapControl1
@@ -140,6 +147,7 @@
             // 
             this.pnl_GPS.BackColor = System.Drawing.Color.Beige;
             this.pnl_GPS.Controls.Add(this.lblRuta);
+            this.pnl_GPS.Controls.Add(this.picAlerta);
             this.pnl_GPS.Controls.Add(this.btnSalir);
             this.pnl_GPS.Controls.Add(this.cmbVehiculos);
             this.pnl_GPS.Controls.Add(this.lblVehiculo);
@@ -151,6 +159,17 @@
             this.pnl_GPS.Name = "pnl_GPS";
             this.pnl_GPS.Size = new System.Drawing.Size(863, 532);
             this.pnl_GPS.TabIndex = 8;
+            // 
+            // picAlerta
+            // 
+            this.picAlerta.Image = global::Wfrm_RastreoVehiculos.Properties.Resources.alerta;
+            this.picAlerta.Location = new System.Drawing.Point(766, 47);
+            this.picAlerta.Name = "picAlerta";
+            this.picAlerta.Size = new System.Drawing.Size(67, 66);
+            this.picAlerta.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.picAlerta.TabIndex = 9;
+            this.picAlerta.TabStop = false;
+            this.picAlerta.Visible = false;
             // 
             // frm_Principal
             // 
@@ -165,6 +184,7 @@
             this.Load += new System.EventHandler(this.frm_Principal_Load);
             this.pnl_GPS.ResumeLayout(false);
             this.pnl_GPS.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picAlerta)).EndInit();
             this.ResumeLayout(false);
 
         }

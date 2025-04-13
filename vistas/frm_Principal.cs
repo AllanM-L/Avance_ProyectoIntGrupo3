@@ -13,7 +13,6 @@ using System.Net.Http;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
 
-
 namespace Wfrm_RastreoVehiculos.vistas
 {
     public partial class frm_Principal : Form
@@ -22,7 +21,8 @@ namespace Wfrm_RastreoVehiculos.vistas
         private GMapMarker marker;
         private Timer timer;
         private List<PointLatLng> routePoints;
-        private string connectionString = "Server=localhost;Database=vehiculos;Uid=root;Pwd=tu_contraseña;";
+        private cls_DBConnection dbConnection = new cls_DBConnection();
+        private bool enAlerta = false;
 
         public frm_Principal()
         {
@@ -31,7 +31,6 @@ namespace Wfrm_RastreoVehiculos.vistas
             InicializarTimer();
             routePoints = new List<PointLatLng>();
             CargarVehiculos();
-
         }
 
         private void InicializarMapa()
@@ -56,11 +55,12 @@ namespace Wfrm_RastreoVehiculos.vistas
             timer.Start();
         }
 
+
         private void CargarVehiculos()
         {
             try
             {
-                using (var connection = new MySqlConnection(connectionString))
+                using (var connection = dbConnection.GetConnection())
                 {
                     connection.Open();
                     string query = "SELECT id, nombre FROM vehiculos";
@@ -89,8 +89,6 @@ namespace Wfrm_RastreoVehiculos.vistas
             }
         }
 
-
-
         private string ObtenerFiltroFecha()
         {
             string filtro = cmbFiltroFecha.SelectedItem?.ToString();
@@ -104,6 +102,7 @@ namespace Wfrm_RastreoVehiculos.vistas
                 return "1";
         }
 
+
         private async void ActualizarUbicacion(object sender, EventArgs e)
         {
             if (cmbVehiculos.SelectedItem == null) return;
@@ -115,19 +114,19 @@ namespace Wfrm_RastreoVehiculos.vistas
 
             try
             {
-                using (var connection = new MySqlConnection(connectionString))
+                using (var connection = dbConnection.GetConnection())
                 {
                     connection.Open();
 
                     string filtroFecha = ObtenerFiltroFecha();
                     string query = $@"
-                SELECT u.latitud, u.longitud, u.fecha_hora,
-                       v.nombre AS nombre_vehiculo, v.marca, v.modelo, v.tipoVehiculo, v.placa, v.estado
-                FROM ubicaciones u
-                JOIN vehiculos v ON u.id_vehiculo = v.id
-                WHERE u.id_vehiculo = @idVehiculo AND {filtroFecha}
-                ORDER BY u.id DESC
-                LIMIT 100";
+                    SELECT u.latitud, u.longitud, u.fecha_hora,
+                    v.nombre AS nombre_vehiculo, v.marca, v.modelo, v.tipoVehiculo, v.placa, v.estado
+                    FROM ubicaciones u
+                    JOIN vehiculos v ON u.id_vehiculo = v.id
+                    WHERE u.id_vehiculo = @idVehiculo AND {filtroFecha}
+                    ORDER BY u.id DESC
+                    LIMIT 100";
 
                     using (var command = new MySqlCommand(query, connection))
                     {
@@ -141,26 +140,31 @@ namespace Wfrm_RastreoVehiculos.vistas
 
                             while (reader.Read())
                             {
-                                double lat = reader.GetDouble("latitud");
-                                double lng = reader.GetDouble("longitud");
-                                DateTime fecha = reader.GetDateTime("fecha_hora");
-
-                                PointLatLng point = new PointLatLng(lat, lng);
-                                routePoints.Insert(0, point); // Invertido para mantener orden cronológico
-
-                                if (routePoints.Count == 1)
+                                if (!reader.IsDBNull(reader.GetOrdinal("latitud")) &&
+                                    !reader.IsDBNull(reader.GetOrdinal("longitud")) &&
+                                    !reader.IsDBNull(reader.GetOrdinal("fecha_hora")))
                                 {
-                                    nombreVehiculo = reader.GetString("nombre_vehiculo");
-                                    marca = reader.GetString("marca");
-                                    modelo = reader.GetString("modelo");
-                                    tipo = reader.GetString("tipoVehiculo");
-                                    placa = reader.GetString("placa");
-                                    estado = reader.GetString("estado");
+                                    double lat = reader.GetDouble("latitud");
+                                    double lng = reader.GetDouble("longitud");
+                                    DateTime fecha = reader.GetDateTime("fecha_hora");
 
-                                    fechaFin = fecha;
+                                    PointLatLng point = new PointLatLng(lat, lng);
+                                    routePoints.Insert(0, point);
+
+                                    if (routePoints.Count == 1)
+                                    {
+                                        nombreVehiculo = reader.IsDBNull(reader.GetOrdinal("nombre_vehiculo")) ? "" : reader.GetString("nombre_vehiculo");
+                                        marca = reader.IsDBNull(reader.GetOrdinal("marca")) ? "" : reader.GetString("marca");
+                                        modelo = reader.IsDBNull(reader.GetOrdinal("modelo")) ? "" : reader.GetString("modelo");
+                                        tipo = reader.IsDBNull(reader.GetOrdinal("tipoVehiculo")) ? "" : reader.GetString("tipoVehiculo");
+                                        placa = reader.IsDBNull(reader.GetOrdinal("placa")) ? "" : reader.GetString("placa");
+                                        estado = reader.IsDBNull(reader.GetOrdinal("estado")) ? "" : reader.GetString("estado");
+
+                                        fechaFin = fecha;
+                                    }
+
+                                    fechaInicio = fecha;
                                 }
-
-                                fechaInicio = fecha; 
                             }
 
                             overlay.Markers.Clear();
@@ -168,37 +172,51 @@ namespace Wfrm_RastreoVehiculos.vistas
 
                             if (routePoints.Count > 0)
                             {
-                                
                                 var inicio = routePoints.First();
                                 var fin = routePoints.Last();
 
-                               
                                 marker = new GMarkerGoogle(fin, GMarkerGoogleType.red_dot);
                                 overlay.Markers.Add(marker);
                                 gMapControl1.Position = fin;
 
-                               
                                 var route = new GMapRoute(routePoints, "Ruta");
                                 route.Stroke = new Pen(Color.Red, 2);
                                 overlay.Routes.Add(route);
 
-                                
                                 double distanciaKm = CalcularDistancia(inicio.Lat, inicio.Lng, fin.Lat, fin.Lng);
                                 TimeSpan tiempoEstimado = fechaFin - fechaInicio;
 
-                                
                                 string nombreLugar = await ObtenerNombreLugar(fin.Lat, fin.Lng);
                                 if (string.IsNullOrEmpty(nombreLugar)) nombreLugar = "Ruta desconocida";
 
-                                
                                 var markerInicio = new GMarkerGoogle(inicio, GMarkerGoogleType.green_dot);
                                 overlay.Markers.Add(markerInicio);
 
-                               
                                 lblInfoVehiculo.Text = $"Vehículo: {nombreVehiculo} - {marca} {modelo} ({tipo}) | Placa: {placa} | Estado: {estado} | Últ. act: {fechaFin}";
                                 lblRuta.Text = $"Ruta: {nombreLugar} | Desde: {inicio.Lat}, {inicio.Lng} hasta {fin.Lat}, {fin.Lng} | {Math.Round(distanciaKm, 2)} km - {Math.Round(tiempoEstimado.TotalMinutes, 1)} min";
-                            }
 
+                                enAlerta = estado.ToLower() == "alerta";
+
+                                if (filtroFecha == "DATE(fecha_hora) = CURDATE()")
+                                {
+                                    if (fechaFin.Date == DateTime.Today && tiempoEstimado.TotalHours > 18)
+                                    {
+                                        enAlerta = true;
+                                    }
+                                }
+
+                                picAlerta.Visible = enAlerta;
+
+                                if (enAlerta)
+                                {
+                                    lblInfoVehiculo.ForeColor = Color.Red;
+                                    lblInfoVehiculo.Text += " ⚠️ ALERTA";
+                                }
+                                else
+                                {
+                                    lblInfoVehiculo.ForeColor = SystemColors.ControlText;
+                                }
+                            }
                             else
                             {
                                 lblInfoVehiculo.Text = $"No hay datos disponibles.";
@@ -210,12 +228,15 @@ namespace Wfrm_RastreoVehiculos.vistas
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al actualizar ubicación: " + ex.Message);
+                MessageBox.Show($"Error al actualizar ubicación: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+
+
         private double CalcularDistancia(double lat1, double lon1, double lat2, double lon2)
         {
-            double R = 6371; // Radio de la tierra en km
+            double R = 6371;
             double dLat = (lat2 - lat1) * Math.PI / 180;
             double dLon = (lon2 - lon1) * Math.PI / 180;
             double a =
@@ -233,7 +254,7 @@ namespace Wfrm_RastreoVehiculos.vistas
                 using (HttpClient client = new HttpClient())
                 {
                     string url = $"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lng}&zoom=14&addressdetails=1";
-                    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0"); // Requerido por Nominatim
+                    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0");
                     var response = await client.GetAsync(url);
                     if (response.IsSuccessStatusCode)
                     {
@@ -247,8 +268,6 @@ namespace Wfrm_RastreoVehiculos.vistas
 
             return null;
         }
-
-
 
         private void frm_Principal_Load(object sender, EventArgs e)
         {
@@ -264,16 +283,16 @@ namespace Wfrm_RastreoVehiculos.vistas
         {
             ActualizarUbicacion(null, null);
         }
+
         private void btnSalir_Click(object sender, EventArgs e)
         {
             this.Hide();
             frm_Menu menu = new frm_Menu("Usuario", "Rol");
             menu.Show();
         }
-
-
     }
 }
+
 
 
 

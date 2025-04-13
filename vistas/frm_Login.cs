@@ -31,14 +31,20 @@ namespace Wfrm_RastreoVehiculos.vistas
         {
             string rutaImagenes = Path.Combine(Application.StartupPath, "img");
 
-            string[] archivos = Directory.GetFiles(rutaImagenes, "*.png")
-                .Concat(Directory.GetFiles(rutaImagenes, "*.jpg"))
-                .Concat(Directory.GetFiles(rutaImagenes, "*.jpeg"))
-                .ToArray();
-
-            foreach (string archivo in archivos)
+            string[] nombresImagenes = new string[]
             {
-                imagenes.Add(Image.FromFile(archivo));
+            "Imagen de piscicultura.png",
+            "logo agroefra.png",
+            "vacas.png"
+            };
+
+            foreach (string nombre in nombresImagenes)
+            {
+                string rutaCompleta = Path.Combine(rutaImagenes, nombre);
+                if (File.Exists(rutaCompleta))
+                {
+                    imagenes.Add(Image.FromFile(rutaCompleta));
+                }
             }
 
             if (imagenes.Count > 0)
@@ -46,6 +52,7 @@ namespace Wfrm_RastreoVehiculos.vistas
                 picture_Login.Image = imagenes[0];
             }
         }
+
         private void IniciarTimer()
         {
             timerImagenes = new Timer();
