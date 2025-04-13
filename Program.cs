@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Wfrm_RastreoVehiculos.vistas;
+
 
 namespace Wfrm_RastreoVehiculos
 {
@@ -16,7 +18,7 @@ namespace Wfrm_RastreoVehiculos
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new frm_Menu());
+            Application.Run(new frm_Login());
         }
     }
 }

@@ -60,6 +60,9 @@
     <Reference Include="MySql.Data, Version=9.1.0.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <HintPath>packages\MySql.Data.9.1.0\lib\net48\MySql.Data.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
@@ -104,44 +107,74 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="frm_Menu.cs">
+    <Compile Include="logica\Vehiculo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="vistas\frm_CalcularViaje.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frm_Menu.Designer.cs">
+    <Compile Include="vistas\frm_CalcularViaje.Designer.cs">
+      <DependentUpon>frm_CalcularViaje.cs</DependentUpon>
+    </Compile>
+    <Compile Include="vistas\frm_FormRegistro.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="vistas\frm_FormRegistro.Designer.cs">
+      <DependentUpon>frm_FormRegistro.cs</DependentUpon>
+    </Compile>
+    <Compile Include="vistas\frm_Login.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="vistas\frm_Login.Designer.cs">
+      <DependentUpon>frm_Login.cs</DependentUpon>
+    </Compile>
+    <Compile Include="vistas\frm_Menu.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="vistas\frm_Menu.Designer.cs">
       <DependentUpon>frm_Menu.cs</DependentUpon>
     </Compile>
-    <Compile Include="frm_Principal.cs">
+    <Compile Include="vistas\frm_Principal.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frm_Principal.Designer.cs">
+    <Compile Include="vistas\frm_Principal.Designer.cs">
       <DependentUpon>frm_Principal.cs</DependentUpon>
     </Compile>
-    <Compile Include="frm_RegistroVehiculos.cs">
+    <Compile Include="vistas\frm_RegistroVehiculos.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frm_RegistroVehiculos.Designer.cs">
+    <Compile Include="vistas\frm_RegistroVehiculos.Designer.cs">
       <DependentUpon>frm_RegistroVehiculos.cs</DependentUpon>
     </Compile>
+    <Compile Include="logica\cls_DBConnection.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="frm_Menu.resx">
+    <EmbeddedResource Include="vistas\frm_CalcularViaje.resx">
+      <DependentUpon>frm_CalcularViaje.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="vistas\frm_FormRegistro.resx">
+      <DependentUpon>frm_FormRegistro.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="vistas\frm_Login.resx">
+      <DependentUpon>frm_Login.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="vistas\frm_Menu.resx">
       <DependentUpon>frm_Menu.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="frm_Principal.resx">
+    <EmbeddedResource Include="vistas\frm_Principal.resx">
       <DependentUpon>frm_Principal.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="frm_RegistroVehiculos.resx">
+    <EmbeddedResource Include="vistas\frm_RegistroVehiculos.resx">
       <DependentUpon>frm_RegistroVehiculos.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -155,6 +188,36 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\logo agroefra.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\Imagen de piscicultura.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\vacas.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\mapaGps2.0.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\vehiculo icono.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\calculadora viaje.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
